@@ -30,3 +30,7 @@ jobs:
       - name: Build API Gateway Docker Image
         working-directory: ./api-gateway
         run: mvn clean package
+
+      - name: Build Exchange Microservice Docker Image
+        working-directory: ./exchange-service
+        run: mvn clean package
