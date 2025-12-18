@@ -38,3 +38,7 @@ jobs:
       - name: Build Book Microservice Docker Image
         working-directory: ./book-service
         run: mvn clean package
+
+      - name: Docker Compose Build
+        working-directory: ./
+        run: docker compose build
