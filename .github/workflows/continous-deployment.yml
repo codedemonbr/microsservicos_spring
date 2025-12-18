@@ -26,3 +26,7 @@ jobs:
       - name: Build Eureka Naming Server Docker Image
         working-directory: ./naming-server
         run: mvn clean package
+
+      - name: Build API Gateway Docker Image
+        working-directory: ./api-gateway
+        run: mvn clean package
