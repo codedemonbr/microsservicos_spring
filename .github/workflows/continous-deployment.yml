@@ -8,6 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: "read"
+      id-token: "write"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -23,14 +28,6 @@ jobs:
           java-version: "21"
           distribution: "adopt"
 
-      - name: Build Eureka Naming Server Docker Image
-        working-directory: ./naming-server
-        run: mvn clean package
-
-      - name: Build API Gateway Docker Image
-        working-directory: ./api-gateway
-        run: mvn clean package
-
       - name: Build Exchange Microservice Docker Image
         working-directory: ./exchange-service
         run: mvn clean package
@@ -45,18 +42,21 @@ jobs:
 
       - name: Tag Docker Images
         run: |
-          docker tag ${{secrets.DOCKER_USERNAME}}/naming-server:latest ${{secrets.DOCKER_USERNAME}}/naming-server:${{github.RUN_ID}}
-          docker tag ${{secrets.DOCKER_USERNAME}}/api-gateway:latest ${{secrets.DOCKER_USERNAME}}/api-gateway:${{github.RUN_ID}}
           docker tag ${{secrets.DOCKER_USERNAME}}/book-service:latest ${{secrets.DOCKER_USERNAME}}/book-service:${{github.RUN_ID}}
+          docker tag ${{secrets.DOCKER_USERNAME}}/book-service:latest ${{secrets.DOCKER_USERNAME}}/book-service:kube-v1
           docker tag ${{secrets.DOCKER_USERNAME}}/exchange-service:latest ${{secrets.DOCKER_USERNAME}}/exchange-service:${{github.RUN_ID}}
+          docker tag ${{secrets.DOCKER_USERNAME}}/exchange-service:latest ${{secrets.DOCKER_USERNAME}}/exchange-service:kube-v1
 
       - name: Push Docker Images to Docker Hub
         run: |
-          docker push ${{secrets.DOCKER_USERNAME}}/naming-server:latest
-          docker push ${{secrets.DOCKER_USERNAME}}/naming-server:${{github.RUN_ID}}
-          docker push ${{secrets.DOCKER_USERNAME}}/api-gateway:latest
-          docker push ${{secrets.DOCKER_USERNAME}}/api-gateway:${{github.RUN_ID}}
           docker push ${{secrets.DOCKER_USERNAME}}/book-service:latest
+          docker push ${{secrets.DOCKER_USERNAME}}/book-service:kube-v1
           docker push ${{secrets.DOCKER_USERNAME}}/book-service:${{github.RUN_ID}}
           docker push ${{secrets.DOCKER_USERNAME}}/exchange-service:latest
+          docker push ${{secrets.DOCKER_USERNAME}}/exchange-service:kube-v1
           docker push ${{secrets.DOCKER_USERNAME}}/exchange-service:${{github.RUN_ID}}
+
+      - uses: "google-github-actions/auth@v3"
+        with:
+          project_id: "project-02667c71-8bca-40e2-a62"
+          workload_identity_provider: "projects/73702852560/locations/global/workloadIdentityPools/github"

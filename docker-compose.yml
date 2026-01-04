@@ -1,70 +1,4 @@
 services:
-  zipkin-server:
-    image: openzipkin/zipkin:3.5.1
-    ports:
-      - 9411:9411
-    restart: always
-    networks:
-      - codedemonbr-network
-
-  naming-server:
-    image: codedemonbr/naming-server
-    restart: always
-    build:
-      context: ./naming-server
-      dockerfile: Dockerfile
-    ports:
-      - 8761:8761
-    depends_on:
-      - zipkin-server
-    networks:
-      - codedemonbr-network
-
-  api-gateway:
-    image: codedemonbr/api-gateway
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    ports:
-      - 8765:8765
-    restart: always
-    depends_on:
-      - zipkin-server
-      - naming-server
-    environment:
-      SPRING_ZIPKIN_BASEURL: http://zipkin-server:9411
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://naming-server:8761/eureka
-    networks:
-      - codedemonbr-network
-
-  book-db:
-    image: mysql:9.3.0
-    restart: always
-    environment:
-      TZ: America/Sao_Paulo
-      MYSQL_ROOT_PASSWORD: sua_senha_segura
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: sua_senha_segura
-      MYSQL_DATABASE: book_service
-    ports:
-      - 3310:3306 # 3310 on host → 3306 on container
-    networks:
-      - codedemonbr-network
-
-  exchange-db:
-    image: mysql:9.3.0
-    restart: always
-    environment:
-      TZ: America/Sao_Paulo
-      MYSQL_ROOT_PASSWORD: sua_senha_segura
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: sua_senha_segura
-      MYSQL_DATABASE: exchange_service
-    ports:
-      - 3308:3306 # 3310 on host → 3306 on container
-    networks:
-      - codedemonbr-network
-
   exchange-service:
     image: codedemonbr/exchange-service
     restart: always
@@ -75,15 +9,11 @@ services:
       TZ: America/Sao_Paulo
       SPRING_ZIPKIN_BASEURL: http://zipkin-server:9411
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://naming-server:8761/eureka
-      SPRING_DATASOURCE_URL: jdbc:mysql://exchange-db:3306/exchange_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/exchange_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
       SPRING_DATASOURCE_USERNAME: docker
       SPRING_DATASOURCE_PASSWORD: sua_senha_segura
     ports:
       - 8000:8000
-    depends_on:
-      - zipkin-server
-      - naming-server
-      - exchange-db
     networks:
       - codedemonbr-network
 
@@ -97,15 +27,11 @@ services:
       TZ: America/Sao_Paulo
       SPRING_ZIPKIN_BASEURL: http://zipkin-server:9411
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://naming-server:8761/eureka
-      SPRING_DATASOURCE_URL: jdbc:mysql://book-db:3306/book_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/book_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
       SPRING_DATASOURCE_USERNAME: docker
       SPRING_DATASOURCE_PASSWORD: sua_senha_segura
     ports:
       - 8100:8100
-    depends_on:
-      - zipkin-server
-      - naming-server
-      - book-db
     networks:
       - codedemonbr-network
 networks:
