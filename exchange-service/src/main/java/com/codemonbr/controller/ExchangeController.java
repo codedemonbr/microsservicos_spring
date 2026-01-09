@@ -52,7 +52,7 @@ public class ExchangeController {
         BigDecimal convertedValue = conversionFactor.multiply(amount);
 
         exchange.setConvertedValue(convertedValue);
-        exchange.setEnvironment(host + " VERSION: kube-v2 PORT " + port);
+        exchange.setEnvironment(host + " VERSION: kube-vn PORT " + port);
 
         return exchange;
     }
