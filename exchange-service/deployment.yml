@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: exchange-service
-          image: codedemonbr/exchange-service:kube-v1
+          image: codedemonbr/exchange-service:kube-v3
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_DATASOURCE_URL
